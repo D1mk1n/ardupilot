@@ -30,17 +30,23 @@ if [ -n "$SITL_RITW_TERMINAL" ]; then
   $SITL_RITW_TERMINAL "$FILEPATH" &
 elif [ -n "$TMUX" ]; then
   tmux new-window -dn "$name" "$*"
-elif [ -n "$DISPLAY" -a -n "$(which osascript)" ]; then
-  osascript -e 'tell application "Terminal" to do script "'"cd $(pwd) && clear && $* "'"'
+elif [ "$(uname | grep -o CYGWIN)" == "CYGWIN" ]; then
+    cmd.exe /c start "$cmd" "$@" > /dev/null 2>&1
+    exit 0
+fi
 elif [ -n "$DISPLAY" -a -n "$(which xterm)" ]; then
   if [ $SITL_RITW_MINIMIZE -eq 1 ]; then
       ICONIC=-iconic
   fi
   xterm $ICONIC -xrm 'XTerm*selectToClipboard: true' -xrm 'XTerm*initialFont: 6' -n "$name" -name "$name" -T "$name" -hold -e $* &
-elif [ -n "$DISPLAY" -a -n "$(which konsole)" ]; then
-  konsole --hold -e $*
-elif [ -n "$DISPLAY" -a -n "$(which gnome-terminal)" ]; then
-  gnome-terminal -e "$*"
+elif [ "$(uname | grep -o CYGWIN)" == "CYGWIN" ]; then
+    cmd.exe /c start "$cmd" "$@" > /dev/null 2>&1
+    exit 0
+fi
+elif [ "$(uname | grep -o CYGWIN)" == "CYGWIN" ]; then
+    cmd.exe /c start "$cmd" "$@" > /dev/null 2>&1
+    exit 0
+fi
 elif [ -n "$STY" ]; then
   # We are running inside of screen, try to start it there
   screen -X screen -t "$name" bash -c "cd $PWD; $*"

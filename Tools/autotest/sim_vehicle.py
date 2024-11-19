@@ -861,17 +861,13 @@ def start_vehicle(binary, opts, stuff, spawns=None):
 
 def start_mavproxy(opts, stuff):
     """Run mavproxy"""
-    # FIXME: would be nice to e.g. "mavproxy.mavproxy(....).run"
-    # rather than shelling out
+    # This will modify the way mavproxy is started, without using /usr/bin/cygstart
 
     extra_cmd = ""
     cmd = []
-    if under_cygwin():
-        cmd.append("/usr/bin/cygstart")
-        cmd.append("-w")
-        cmd.append("mavproxy.exe")
-    else:
-        cmd.append("mavproxy.py")
+
+    # Use direct MAVProxy script without cygstart, more universal
+    cmd.append("mavproxy.py")
 
     if opts.mcast:
         cmd.extend(["--master", "mcast:"])
@@ -882,7 +878,7 @@ def start_mavproxy(opts, stuff):
 
     for i in instances:
         if not opts.no_extra_ports:
-            ports = [14550 + 10 * i]
+            ports = [p + 10 * i for p in [14550, 14551]]
             for port in ports:
                 if under_vagrant():
                     # We're running inside of a vagrant guest; forward our
@@ -905,12 +901,12 @@ def start_mavproxy(opts, stuff):
 
     if opts.tracker:
         cmd.extend(["--load-module", "tracker"])
-        global tracker_serial0
-        # tracker_serial0 is set when we start the tracker...
+        global tracker_uarta
+        # tracker_uarta is set when we start the tracker...
         extra_cmd += ("module load map;"
                       "tracker set port %s; "
                       "tracker start; "
-                      "tracker arm;" % (tracker_serial0,))
+                      "tracker arm;" % (tracker_uarta,))
 
     if opts.mavlink_gimbal:
         cmd.extend(["--load-module", "gimbal"])
@@ -964,8 +960,6 @@ def start_mavproxy(opts, stuff):
         cmd.extend(['--aircraft', opts.aircraft])
     if opts.moddebug:
         cmd.append('--moddebug=%u' % opts.moddebug)
-    if opts.mavcesium:
-        cmd.extend(["--load-module", "cesium"])
 
     if opts.fresh_params:
         # these were built earlier:
@@ -985,19 +979,10 @@ def start_mavproxy(opts, stuff):
     if old is not None:
         env['PYTHONPATH'] += os.path.pathsep + old
 
+    # Run the command to start MAVProxy
     run_cmd_blocking("Run MavProxy", cmd, env=env)
     progress("MAVProxy exited")
 
-    if opts.gdb:
-        # in the case that MAVProxy exits (as opposed to being
-        # killed), restart it if we are running under GDB.  This
-        # allows ArduPilot to stop (eg. via a very early panic call)
-        # and have you debugging session not be killed.
-        while True:
-            progress("Running under GDB; restarting MAVProxy")
-            run_cmd_blocking("Run MavProxy", cmd, env=env)
-            progress("MAVProxy exited; sleeping 10")
-            time.sleep(10)
 
 
 vehicle_options_string = '|'.join(vinfo.options.keys())

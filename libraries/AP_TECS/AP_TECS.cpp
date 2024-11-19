@@ -141,7 +141,7 @@ const AP_Param::GroupInfo AP_TECS::var_info[] = {
     // @Param: PITCH_MAX
     // @DisplayName: Maximum pitch in auto flight
     // @Description: Overrides PTCH_LIM_MAX_DEG in automatic throttle modes to reduce climb rates. Uses PTCH_LIM_MAX_DEG if set to 0. For proper TECS tuning, set to the angle that the aircraft can climb at AIRSPEED_CRUISE and THR_MAX.
-    // @Range: 0 45
+    // @Range: 0 90
     // @Increment: 1
     // @User: Advanced
     AP_GROUPINFO("PITCH_MAX", 15, AP_TECS, _pitch_max, 15),
@@ -149,7 +149,7 @@ const AP_Param::GroupInfo AP_TECS::var_info[] = {
     // @Param: PITCH_MIN
     // @DisplayName: Minimum pitch in auto flight
     // @Description: Overrides PTCH_LIM_MIN_DEG in automatic throttle modes to reduce descent rates. Uses PTCH_LIM_MIN_DEG if set to 0. For proper TECS tuning, set to the angle that the aircraft can descend at without overspeeding.
-    // @Range: -45 0
+    // @Range: -90 0
     // @Increment: 1
     // @User: Advanced
     AP_GROUPINFO("PITCH_MIN", 16, AP_TECS, _pitch_min, 0),
@@ -181,7 +181,7 @@ const AP_Param::GroupInfo AP_TECS::var_info[] = {
     // @Param: LAND_PMAX
     // @DisplayName: Maximum pitch during final stage of landing
     // @Description: This limits the pitch used during the final stage of automatic landing. During the final landing stage most planes need to keep their pitch small to avoid stalling. A maximum of 10 degrees is usually good. A value of zero means to use the normal pitch limits.
-    // @Range: -5 40
+    // @Range: -90 90
     // @Increment: 1
     // @User: Advanced
     AP_GROUPINFO("LAND_PMAX", 20, AP_TECS, _land_pitch_max, 10),
@@ -1473,7 +1473,7 @@ void AP_TECS::_update_pitch_limits(const int32_t ptchMinCO_cd) {
         if (_land_pitch_min <= -90) {
             _land_pitch_min = _PITCHminf;
         }
-        const float flare_pitch_range = 20;
+        const float flare_pitch_range = 90;
         const float delta_per_loop = (flare_pitch_range/_landTimeConst) * _DT;
         _PITCHminf = MIN(_PITCHminf, _land_pitch_min+delta_per_loop);
         _land_pitch_min = MAX(_land_pitch_min, _PITCHminf);

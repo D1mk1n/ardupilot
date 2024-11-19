@@ -271,8 +271,8 @@ void AP_Landing::type_slope_setup_landing_glide_slope(const Location &prev_WP_lo
 
     // calculate time to lose the needed altitude
     float sink_time = total_distance / groundspeed;
-    if (sink_time < 0.5f) {
-        sink_time = 0.5f;
+    if (sink_time < 0.01f) {
+        sink_time = 0.01f;
     }
 
     // find the sink rate needed for the target location
