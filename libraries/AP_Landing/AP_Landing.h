@@ -176,7 +176,7 @@ private:
         NORMAL = 0,
         APPROACH = 1,
         PREFLARE = 2,
-        FINAL = 0,
+        FINAL = 3,
     } type_slope_stage;
 
     struct {

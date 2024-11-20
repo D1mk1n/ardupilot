@@ -141,18 +141,18 @@ const AP_Param::GroupInfo AP_TECS::var_info[] = {
     // @Param: PITCH_MAX
     // @DisplayName: Maximum pitch in auto flight
     // @Description: Overrides PTCH_LIM_MAX_DEG in automatic throttle modes to reduce climb rates. Uses PTCH_LIM_MAX_DEG if set to 0. For proper TECS tuning, set to the angle that the aircraft can climb at AIRSPEED_CRUISE and THR_MAX.
-    // @Range: 0 90
+    // @Range: 0 45
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("PITCH_MAX", 15, AP_TECS, _pitch_max, 90),
+    AP_GROUPINFO("PITCH_MAX", 15, AP_TECS, _pitch_max, 15),
 
     // @Param: PITCH_MIN
     // @DisplayName: Minimum pitch in auto flight
     // @Description: Overrides PTCH_LIM_MIN_DEG in automatic throttle modes to reduce descent rates. Uses PTCH_LIM_MIN_DEG if set to 0. For proper TECS tuning, set to the angle that the aircraft can descend at without overspeeding.
-    // @Range: -90 0
+    // @Range: -45 0
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("PITCH_MIN", 16, AP_TECS, _pitch_min, -90),
+    AP_GROUPINFO("PITCH_MIN", 16, AP_TECS, _pitch_min, 0),
 
     // @Param: LAND_SINK
     // @DisplayName: Sink rate for final landing stage
@@ -181,19 +181,19 @@ const AP_Param::GroupInfo AP_TECS::var_info[] = {
     // @Param: LAND_PMAX
     // @DisplayName: Maximum pitch during final stage of landing
     // @Description: This limits the pitch used during the final stage of automatic landing. During the final landing stage most planes need to keep their pitch small to avoid stalling. A maximum of 10 degrees is usually good. A value of zero means to use the normal pitch limits.
-    // @Range: -90 90
+    // @Range: -5 40
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("LAND_PMAX", 20, AP_TECS, _land_pitch_max, 90),
+    AP_GROUPINFO("LAND_PMAX", 20, AP_TECS, _land_pitch_max, 10),
 
     // @Param: APPR_SMAX
     // @DisplayName: Sink rate max for landing approach stage
     // @Description: The sink rate max for the landing approach stage of landing. This will need to be large for steep landing approaches especially when using reverse thrust. If 0, then use TECS_SINK_MAX.
-    // @Range: 0.0 100.0
+    // @Range: 0.0 20.0
     // @Units: m/s
     // @Increment: 0.1
     // @User: Advanced
-    AP_GROUPINFO("APPR_SMAX", 21, AP_TECS, _maxSinkRate_approach, 100),
+    AP_GROUPINFO("APPR_SMAX", 21, AP_TECS, _maxSinkRate_approach, 0),
 
     // @Param: LAND_SRC
     // @DisplayName: Land sink rate change
@@ -1473,7 +1473,7 @@ void AP_TECS::_update_pitch_limits(const int32_t ptchMinCO_cd) {
         if (_land_pitch_min <= -90) {
             _land_pitch_min = _PITCHminf;
         }
-        const float flare_pitch_range = 90;
+        const float flare_pitch_range = 20;
         const float delta_per_loop = (flare_pitch_range/_landTimeConst) * _DT;
         _PITCHminf = MIN(_PITCHminf, _land_pitch_min+delta_per_loop);
         _land_pitch_min = MAX(_land_pitch_min, _PITCHminf);
