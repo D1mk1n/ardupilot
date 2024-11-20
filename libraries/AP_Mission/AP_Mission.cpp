@@ -2,6 +2,7 @@
 /// @brief   Handles the MAVLINK command mission stack.  Reads and writes mission to storage.
 
 #include "AP_Mission_config.h"
+#include "AP_Mission.h"
 
 #if AP_MISSION_ENABLED
 
@@ -60,7 +61,48 @@ HAL_Semaphore AP_Mission::_rsem;
 /// public mission methods
 ///
 
+bool AP_Mission::get_next_nav_cmd(Mission_Command& cmd) const {
+    uint16_t next_index = _nav_cmd.index + 1; // Начинаем с команды после текущей
+    while (next_index < _cmd_total) {
+        Mission_Command temp_cmd;
+        if (read_cmd_from_storage(next_index, temp_cmd)) {
+            if (is_nav_cmd(temp_cmd)) {
+                cmd = temp_cmd; // Найдена следующая навигационная команда
+                return true;
+            }
+        }
+        next_index++;
+    }
+    return false; // Навигационная команда не найдена
+}
+
 /// init - initialises this library including checks the version in eeprom matches this library
+bool AP_Mission::is_last_before_land() {
+    // Получаем текущую навигационную команду
+    const Mission_Command& current_cmd = get_current_nav_cmd();
+
+    // Проверяем, что текущая команда - это WAYPOINT
+    if (current_cmd.id != MAV_CMD_NAV_WAYPOINT) {
+        return false;
+    }
+
+    // Получаем следующую навигационную команду
+    Mission_Command next_cmd;
+    if (!get_next_nav_cmd(current_cmd.index, next_cmd)) {
+        // Если не удалось получить следующую команду, это не последняя перед LAND
+        return false;
+    }
+
+    // Проверяем, что следующая команда - это LAND
+    return next_cmd.id == MAV_CMD_NAV_LAND;
+}
+
+
+Vector3f AP_Mission::get_land_point() {
+    // Возвращаем заранее сохраненные координаты LAND
+    return land_point;
+}
+
 void AP_Mission::init()
 {
 #if AP_SDCARD_STORAGE_ENABLED
@@ -538,23 +580,14 @@ bool AP_Mission::is_nav_cmd(const Mission_Command& cmd)
 /// get_next_nav_cmd - gets next "navigation" command found at or after start_index
 ///     returns true if found, false if not found (i.e. reached end of mission command list)
 ///     accounts for do_jump commands but never increments the jump's num_times_run (advance_current_nav_cmd is responsible for this)
-bool AP_Mission::get_next_nav_cmd(uint16_t start_index, Mission_Command& cmd)
-{
-    // search until the end of the mission command list
-    for (uint16_t cmd_index = start_index; cmd_index < (unsigned)_cmd_total; cmd_index++) {
-        // get next command
-        if (!get_next_cmd(cmd_index, cmd, false)) {
-            // no more commands so return failure
-            return false;
-        }
-        // if found a "navigation" command then return it
-        if (is_nav_cmd(cmd)) {
-            return true;
+bool AP_Mission::get_next_nav_cmd(uint16_t start_index, Mission_Command& cmd) {
+    // Перебираем команды начиная с указанного индекса
+    for (uint16_t i = start_index; i < _cmd_total; i++) {
+        if (read_cmd_from_storage(i, cmd) && is_nav_cmd(cmd)) {
+            return true; // Возвращаем первую навигационную команду
         }
     }
-
-    // if we got this far we did not find a navigation command
-    return false;
+    return false; // Следующей навигационной команды нет
 }
 
 /// get the ground course of the next navigation leg in centidegrees

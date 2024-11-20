@@ -1,3 +1,5 @@
+#ifndef AP_MISSION_H
+#define AP_MISSION_H
 /// @file    AP_Mission.h
 /// @brief   Handles the MAVLINK command mission stack.  Reads and writes mission to storage.
 
@@ -13,6 +15,7 @@
 #pragma once
 
 #include "AP_Mission_config.h"
+#include <AP_Math/vector3.h>
 
 #include <GCS_MAVLink/GCS_MAVLink.h>
 #include <AP_Math/AP_Math.h>
@@ -63,6 +66,8 @@ class AP_Mission
 {
 
 public:
+	bool is_last_before_land();
+	Vector3f get_land_point(); // Получить координаты точки LAND
     // jump command structure
     struct PACKED Jump_Command {
         uint16_t target;        // target command id
@@ -782,7 +787,11 @@ public:
     void set_log_start_mission_item_bit(uint32_t bit) { log_start_mission_item_bit = bit; }
 #endif
 
+    bool get_next_nav_cmd(Mission_Command& cmd) const;
+
 private:
+    Vector3f land_point; // Сохраненные координаты LAND
+
     static AP_Mission *_singleton;
 
     static StorageAccess _storage;
@@ -964,3 +973,4 @@ namespace AP
 {
 AP_Mission *mission();
 };
+#endif // AP_MISSION_H

@@ -207,9 +207,12 @@ AP_Landing::AP_Landing(AP_Mission &_mission, AP_AHRS &_ahrs, AP_TECS *_tecs_Cont
     AP_Param::setup_object_defaults(this, var_info);
 }
 
-void AP_Landing::do_land(const AP_Mission::Mission_Command& cmd, const float relative_altitude)
+void AP_Landing::do_land(const AP_Mission::Mission_Command &cmd, const float relative_altitude)
 {
-    Log(); // log old state so we get a nice transition from old to new here
+    if (disable_landing_modes) {
+        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Landing modes disabled, straight descent active");
+        return;
+    }
 
     flags.commanded_go_around = false;
 
@@ -223,10 +226,8 @@ void AP_Landing::do_land(const AP_Mission::Mission_Command& cmd, const float rel
         break;
 #endif
     default:
-        // a incorrect type is handled in the verify_land
         break;
     }
-
     Log();
 }
 
@@ -234,9 +235,16 @@ void AP_Landing::do_land(const AP_Mission::Mission_Command& cmd, const float rel
   update navigation for landing. Called when on landing approach or
   final flare
  */
+// обновленный метод для проверки посадки
 bool AP_Landing::verify_land(const Location &prev_WP_loc, Location &next_WP_loc, const Location &current_loc,
         const float height, const float sink_rate, const float wp_proportion, const uint32_t last_flying_ms, const bool is_armed, const bool is_flying, const bool rangefinder_state_in_range)
 {
+    // Если посадочные режимы отключены, пропускаем стандартные проверки
+	if (disable_landing_modes) {
+        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Skipping standard landing checks, straight trajectory active");
+        return true;
+    }
+
     bool success = true;
 
     switch (type) {
@@ -251,8 +259,6 @@ bool AP_Landing::verify_land(const Location &prev_WP_loc, Location &next_WP_loc,
         break;
 #endif
     default:
-        // returning TRUE while executing verify_land() will increment the
-        // mission index which in many cases will trigger an RTL for end-of-mission
         GCS_SEND_TEXT(MAV_SEVERITY_CRITICAL, "Landing configuration error, invalid LAND_TYPE");
         success = true;
         break;
@@ -330,8 +336,14 @@ bool AP_Landing::send_landing_message(mavlink_channel_t chan) {
     }
 }
 
+// обновленный метод для проверки завершения flare
 bool AP_Landing::is_flaring(void) const
 {
+    // Если посадочные режимы отключены, flare не активен
+    if (disable_landing_modes) {
+        return false;
+    }
+
     if (!flags.in_progress) {
         return false;
     }
@@ -341,6 +353,7 @@ bool AP_Landing::is_flaring(void) const
         return type_slope_is_flaring();
 #if HAL_LANDING_DEEPSTALL_ENABLED
     case TYPE_DEEPSTALL:
+        return deepstall.is_flaring();
 #endif
     default:
         return false;
@@ -521,8 +534,14 @@ bool AP_Landing::restart_landing_sequence()
     return success;
 }
 
+// обновленный метод для ограничения крена
 int32_t AP_Landing::constrain_roll(const int32_t desired_roll_cd, const int32_t level_roll_limit_cd)
 {
+    // Если посадочные режимы отключены, не ограничиваем крен
+    if (disable_landing_modes) {
+        return desired_roll_cd;
+    }
+
     switch (type) {
     case TYPE_STANDARD_GLIDE_SLOPE:
         return type_slope_constrain_roll(desired_roll_cd, level_roll_limit_cd);
@@ -613,8 +632,14 @@ void AP_Landing::handle_flight_stage_change(const bool _in_landing_stage)
 /*
  * returns true when a landing is complete, usually used to disable throttle
  */
+// обновленный метод для проверки завершения посадки
 bool AP_Landing::is_complete(void) const
 {
+    // Если посадочные режимы отключены, посадка завершена при касании земли
+    if (disable_landing_modes) {
+        return !flags.in_progress;
+    }
+
     switch (type) {
     case TYPE_STANDARD_GLIDE_SLOPE:
         return type_slope_is_complete();

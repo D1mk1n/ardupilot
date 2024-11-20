@@ -23,6 +23,17 @@ const AP_HAL::HAL& hal = AP_HAL::get_HAL();
 /*
   constructor for main Plane class
  */
+bool Plane::is_last_waypoint_before_land() {
+    // Проверка, является ли текущая точка последней перед LAND
+    return mission.is_last_before_land();
+}
+
+Vector3f Plane::get_current_position() const {
+    return Vector3f(current_loc.lat * 1.0e-7f, // Перевод широты в float
+                    current_loc.lng * 1.0e-7f, // Перевод долготы в float
+                    current_loc.alt * 1.0f);   // Высота в метрах
+}
+
 Plane::Plane(void)
 {
     // C++11 doesn't allow in-class initialisation of bitfields

@@ -1,3 +1,5 @@
+#ifndef PLANE_H
+#define PLANE_H
 /*
    Lead developer: Andrew Tridgell & Tom Pittenger
 
@@ -128,6 +130,16 @@
  */
 class Plane : public AP_Vehicle {
 public:
+	// Новая логика
+	bool flagLand = true;
+	Vector3f land_point;
+	Vector3f get_current_position() const;
+	bool is_last_waypoint_before_land();
+	void build_straight_trajectory_to_land();
+
+	// Флаг для отключения flare и preflare
+	bool disable_landing_modes;
+
     friend class GCS_MAVLINK_Plane;
     friend class Parameters;
     friend class ParametersG2;
@@ -172,7 +184,6 @@ public:
     friend class ModeTakeoff;
     friend class ModeThermal;
     friend class ModeLoiterAltQLand;
-
 #if AP_EXTERNAL_CONTROL_ENABLED
     friend class AP_ExternalControl_Plane;
 #endif
@@ -183,8 +194,11 @@ public:
     Plane(void);
 
 private:
+    Vector3f target_trajectory; // Прямая траектория
+	float target_pitch;         // Целевой тангаж
+	float target_speed;         // Целевая скорость
 
-    // key aircraft parameters passed to multiple libraries
+    // key aircraft parameterSs passed to multiple libraries
     AP_FixedWing aparm;
 
     // Global parameters are all contained within the 'g' and 'g2' classes.
@@ -1085,6 +1099,7 @@ private:
     bool flight_option_enabled(FlightOptions flight_option) const;
 
     // navigation.cpp
+    Vector3f calculate_straight_line_trajectory(const Vector3f& start, const Vector3f& end);
     void loiter_angle_reset(void);
     void loiter_angle_update(void);
     void navigate();
@@ -1318,3 +1333,4 @@ extern Plane plane;
 
 using AP_HAL::millis;
 using AP_HAL::micros;
+#endif // PLANE_H

@@ -1,8 +1,48 @@
 #include "Plane.h"
-
+//#include <AP_Navigation/AP_Navigation.h>
 /*
   reset the total loiter angle
  */
+
+Vector3f Plane::calculate_straight_line_trajectory(const Vector3f& start, const Vector3f& end) {
+    Vector3f trajectory = end - start;
+    trajectory.normalize(); // Нормализация для получения единичного вектора направления
+    return trajectory;
+}
+
+void Plane::build_straight_trajectory_to_land() {
+    Vector3f current_position = get_current_position();
+   // Vector3f land_point = mission.get_land_point();
+    char buffer[100]; // Создаем буфер для строки
+    char buffer1[100];
+    char buffer2[100];
+    snprintf(buffer, sizeof(buffer), "Current Position: X=%.3f, Y=%.3f, Z=%.3f",
+             (double)current_position.x,
+             (double)current_position.y,
+             (double)current_position.z);
+    snprintf(buffer1, sizeof(buffer1), "LAND Position: X=%.3f, Y=%.3f, Z=%.3f",
+                 (double)land_point.x,
+                 (double)land_point.y,
+                 (double)land_point.z);
+
+    // Отправляем текст через GCS
+
+    target_trajectory = calculate_straight_line_trajectory(current_position, land_point);
+    snprintf(buffer2, sizeof(buffer2), "target_trajectory: X=%.3f, Y=%.3f, Z=%.3f",
+                     (double)target_trajectory.x,
+                     (double)target_trajectory.y,
+                     (double)target_trajectory.z);
+    target_pitch = 0;  // Убираем ограничения тангажа
+    target_speed = aparm.airspeed_max;  // Максимальная скорость
+    if(flagLand)
+    {
+    gcs().send_text(MAV_SEVERITY_INFO, "%s", buffer2);
+    gcs().send_text(MAV_SEVERITY_INFO, "%s", buffer);
+       gcs().send_text(MAV_SEVERITY_INFO, "%s", buffer1);
+       flagLand = false;
+    }
+}
+
 void Plane::loiter_angle_reset(void)
 {
     loiter.sum_cd = 0;

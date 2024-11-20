@@ -66,7 +66,7 @@ public:
 
     void convert_parameters(void);
 
-    void do_land(const AP_Mission::Mission_Command& cmd, const float relative_altitude);
+    void do_land(const AP_Mission::Mission_Command &cmd, const float relative_altitude);
     bool verify_abort_landing(const Location &prev_WP_loc, Location &next_WP_loc, const Location &current_loc,
             const int32_t auto_state_takeoff_altitude_rel_cm, bool &throttle_suppressed);
     bool verify_land(const Location &prev_WP_loc, Location &next_WP_loc, const Location &current_loc,
@@ -114,6 +114,7 @@ public:
 
     // landing altitude offset (meters)
     float alt_offset;
+    bool disable_landing_modes = false; // Флаг для управления режимами flare и preflare
 
 private:
     struct {

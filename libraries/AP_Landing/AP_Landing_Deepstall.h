@@ -31,6 +31,11 @@ class AP_Landing;
 /// @brief  Class managing Plane Deepstall landing methods
 class AP_Landing_Deepstall
 {
+public:
+	bool is_flaring() const {
+	        // Реализация логики для deepstall (если применимо)
+	        return false; // По умолчанию возвращаем false
+	    }
 private:
     friend class AP_Landing;
 
