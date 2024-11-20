@@ -144,7 +144,7 @@ const AP_Param::GroupInfo AP_TECS::var_info[] = {
     // @Range: 0 90
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("PITCH_MAX", 15, AP_TECS, _pitch_max, 15),
+    AP_GROUPINFO("PITCH_MAX", 15, AP_TECS, _pitch_max, 90),
 
     // @Param: PITCH_MIN
     // @DisplayName: Minimum pitch in auto flight
@@ -152,7 +152,7 @@ const AP_Param::GroupInfo AP_TECS::var_info[] = {
     // @Range: -90 0
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("PITCH_MIN", 16, AP_TECS, _pitch_min, 0),
+    AP_GROUPINFO("PITCH_MIN", 16, AP_TECS, _pitch_min, -90),
 
     // @Param: LAND_SINK
     // @DisplayName: Sink rate for final landing stage
@@ -184,16 +184,16 @@ const AP_Param::GroupInfo AP_TECS::var_info[] = {
     // @Range: -90 90
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("LAND_PMAX", 20, AP_TECS, _land_pitch_max, 10),
+    AP_GROUPINFO("LAND_PMAX", 20, AP_TECS, _land_pitch_max, 90),
 
     // @Param: APPR_SMAX
     // @DisplayName: Sink rate max for landing approach stage
     // @Description: The sink rate max for the landing approach stage of landing. This will need to be large for steep landing approaches especially when using reverse thrust. If 0, then use TECS_SINK_MAX.
-    // @Range: 0.0 20.0
+    // @Range: 0.0 100.0
     // @Units: m/s
     // @Increment: 0.1
     // @User: Advanced
-    AP_GROUPINFO("APPR_SMAX", 21, AP_TECS, _maxSinkRate_approach, 0),
+    AP_GROUPINFO("APPR_SMAX", 21, AP_TECS, _maxSinkRate_approach, 100),
 
     // @Param: LAND_SRC
     // @DisplayName: Land sink rate change

@@ -56,11 +56,7 @@ void AP_Landing::type_slope_verify_abort_landing(const Location &prev_WP_loc, Lo
 bool AP_Landing::type_slope_verify_land(const Location &prev_WP_loc, Location &next_WP_loc, const Location &current_loc,
         const float height, const float sink_rate, const float wp_proportion, const uint32_t last_flying_ms, const bool is_armed, const bool is_flying, const bool rangefinder_state_in_range)
 {
-    // we don't 'verify' landing in the sense that it never completes,
-    // so we don't verify command completion. Instead we use this to
-    // adjust final landing parameters
-
-    // determine stage
+    // Determine stage
     if (type_slope_stage == SlopeStage::NORMAL) {
         const bool heading_lined_up = abs(nav_controller->bearing_error_cd()) < 1000 && !nav_controller->data_is_stale();
         const bool on_flight_line = fabsf(nav_controller->crosstrack_error()) < 5.0f && !nav_controller->data_is_stale();
@@ -73,103 +69,25 @@ bool AP_Landing::type_slope_verify_land(const Location &prev_WP_loc, Location &n
         }
     }
 
-    /* Set land_complete (which starts the flare) under 3 conditions:
-       1) we are within LAND_FLARE_ALT meters of the landing altitude
-       2) we are within LAND_FLARE_SEC of the landing point vertically
-          by the calculated sink rate (if LAND_FLARE_SEC != 0)
-       3) we have gone past the landing point and don't have
-          rangefinder data (to prevent us keeping throttle on
-          after landing if we've had positive baro drift)
-    */
-
-    // flare check:
-    // 1) below flare alt/sec requires approach stage check because if sec/alt are set too
-    //    large, and we're on a hard turn to line up for approach, we'll prematurely flare by
-    //    skipping approach phase and the extreme roll limits will make it hard to line up with runway
-    // 2) passed land point and don't have an accurate AGL
-    // 3) probably crashed (ensures motor gets turned off)
-
-    const bool on_approach_stage = type_slope_is_on_approach();
-    const bool below_flare_alt = (height <= flare_alt);
-    const bool below_flare_sec = (flare_sec > 0 && height <= sink_rate * flare_sec);
-    const bool probably_crashed = (aparm.crash_detection_enable && fabsf(sink_rate) < 0.2f && !is_flying);
-
-    height_flare_log = height;
-
-    const AP_GPS &gps = AP::gps();
-
-    if ((on_approach_stage && below_flare_alt) ||
-        (on_approach_stage && below_flare_sec && (wp_proportion > 0.5)) ||
-        (!rangefinder_state_in_range && wp_proportion >= 1) ||
-        probably_crashed) {
-
-        if (type_slope_stage != SlopeStage::FINAL) {
-            type_slope_flags.post_stats = true;
-            if (is_flying && (AP_HAL::millis()-last_flying_ms) > 3000) {
-                GCS_SEND_TEXT(MAV_SEVERITY_CRITICAL, "Flare crash detected: speed=%.1f", (double)gps.ground_speed());
-            } else {
-                GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Flare %.1fm sink=%.2f speed=%.1f dist=%.1f",
-                                  (double)height, (double)sink_rate,
-                                  (double)gps.ground_speed(),
-                                  (double)current_loc.get_distance(next_WP_loc));
-            }
-            
-            type_slope_stage = SlopeStage::FINAL;
-
-#if AP_LANDINGGEAR_ENABLED
-            // Check if the landing gear was deployed before landing
-            // If not - go around
-            AP_LandingGear *LG_inst = AP_LandingGear::get_singleton();
-            if (LG_inst != nullptr && !LG_inst->check_before_land()) {
-                type_slope_request_go_around();
-                GCS_SEND_TEXT(MAV_SEVERITY_CRITICAL, "Landing gear was not deployed");
-            }
-#endif
-        }
-
-        if (gps.ground_speed() < 3) {
-            // reload any airspeed or groundspeed parameters that may have
-            // been set for landing. We don't do this till ground
-            // speed drops below 3.0 m/s as otherwise we will change
-            // target speeds too early.
-            aparm.airspeed_cruise.load();
-            aparm.min_groundspeed.load();
-            aparm.throttle_cruise.load();
-        }
-    } else if (type_slope_stage == SlopeStage::APPROACH && pre_flare_airspeed > 0) {
-        bool reached_pre_flare_alt = pre_flare_alt > 0 && (height <= pre_flare_alt);
-        bool reached_pre_flare_sec = pre_flare_sec > 0 && (height <= sink_rate * pre_flare_sec);
-        if (reached_pre_flare_alt || reached_pre_flare_sec) {
-            type_slope_stage = SlopeStage::PREFLARE;
-        }
-    }
-
     /*
       when landing we keep the L1 navigation waypoint 200m ahead. This
       prevents sudden turns if we overshoot the landing point
-     */
+    */
     Location land_WP_loc = next_WP_loc;
 
     int32_t land_bearing_cd = prev_WP_loc.get_bearing_to(next_WP_loc);
     land_WP_loc.offset_bearing(land_bearing_cd * 0.01f, prev_WP_loc.get_distance(current_loc) + 200);
     nav_controller->update_waypoint(prev_WP_loc, land_WP_loc);
 
-    // once landed and stationary, post some statistics
-    // this is done before disarm_if_autoland_complete() so that it happens on the next loop after the disarm
-    if (type_slope_flags.post_stats && !is_armed) {
-        type_slope_flags.post_stats = false;
-        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Distance from LAND point=%.2fm", (double)current_loc.get_distance(next_WP_loc));
-    }
-
-    // check if we should auto-disarm after a confirmed landing
+    // Check if we should auto-disarm after a confirmed landing
     if (type_slope_stage == SlopeStage::FINAL) {
         disarm_if_autoland_complete_fn();
     }
 
     if (mission.continue_after_land() &&
         type_slope_stage == SlopeStage::FINAL &&
-        gps.status() >= AP_GPS::GPS_OK_FIX_3D &&
-        gps.ground_speed() < 1) {
+		AP::gps().status() >= AP_GPS::GPS_OK_FIX_3D &&
+		AP::gps().ground_speed() < 1) {
         /*
           user has requested to continue with mission after a
           landing. Return true to allow for continue
@@ -254,89 +172,50 @@ void AP_Landing::type_slope_setup_landing_glide_slope(const Location &prev_WP_lo
 {
     float total_distance = prev_WP_loc.get_distance(next_WP_loc);
 
-    // If someone mistakenly puts all 0's in their LAND command then total_distance
-    // will be calculated as 0 and cause a divide by 0 error below.  Lets avoid that.
+    // Если расстояние меньше 1 метра, устанавливаем минимальное значение, чтобы избежать деления на 0
     if (total_distance < 1) {
         total_distance = 1;
     }
 
-    // height we need to sink for this WP
-    float sink_height = (prev_WP_loc.alt - next_WP_loc.alt)*0.01f;
+    // Высота, которую нужно потерять
+    float sink_height = (prev_WP_loc.alt - next_WP_loc.alt) * 0.01f;
 
-    // current ground speed
+    // Угол наклона
+    slope = sink_height / total_distance;
+
+    // Выводим угол наклона в консоль
+    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Calculated glide slope: %.1f degrees, sink_height: %.1f m, total_distance: %.1f m",
+                  (double)degrees(atanf(slope)), (double)sink_height, (double)total_distance);
+
+    // Текущая скорость по земле
     float groundspeed = ahrs.groundspeed();
     if (groundspeed < 0.5f) {
-        groundspeed = 0.5f;
+        groundspeed = 0.5f; // минимальная скорость
     }
 
-    // calculate time to lose the needed altitude
+    // Время снижения
     float sink_time = total_distance / groundspeed;
-    if (sink_time < 0.01f) {
-        sink_time = 0.01f;
+    if (sink_time < 0.1f) {
+        sink_time = 0.1f; // минимальное время снижения
     }
 
-    // find the sink rate needed for the target location
-    float sink_rate = sink_height / sink_time;
+    // Пропорция пути к посадке
+    float land_proportion = current_loc.line_path_proportion(prev_WP_loc, next_WP_loc);
 
-    // the height we aim for is the one to give us the right flare point
-    float aim_height = flare_sec * sink_rate;
-    if (aim_height <= 0) {
-        aim_height = flare_alt;
-    }
+    // Рассчитываем целевую высоту на основе траектории и угла наклона
+    float target_height = next_WP_loc.alt * 0.01f + slope * (total_distance * (1.0f - land_proportion));
+    // Преобразуем целевую высоту в сантиметры
+    target_altitude_offset_cm = (target_height - current_loc.alt * 0.01f) * 100;
 
-    // don't allow the aim height to be too far above LAND_FLARE_ALT
-    if (flare_alt > 0 && aim_height > flare_alt*2) {
-        aim_height = flare_alt*2;
-    }
+    // Устанавливаем целевую высоту в автопилот
+    set_target_altitude_proportion_fn(next_WP_loc, 1.0f - land_proportion);
 
-    // calculate time spent in flare assuming the sink rate reduces over time from sink_rate at aim_height
-    // to tecs_controller->get_land_sinkrate() at touchdown
-    const float weight = constrain_float(0.01f*(float)flare_effectivness_pct, 0.0f, 1.0f);
-    const float flare_sink_rate_avg = MAX(weight * tecs_Controller->get_land_sinkrate() + (1.0f - weight) * sink_rate, 0.1f);
-    const float flare_time = aim_height / flare_sink_rate_avg;
+    // Удерживаем высоту в пределах начальной и конечной точки маршрута
+    constrain_target_altitude_location_fn(next_WP_loc, prev_WP_loc);
 
-    // distance to flare is based on ground speed, adjusted as we
-    // get closer. This takes into account the wind
-    float flare_distance = groundspeed * flare_time;
-
-    // don't allow the flare before half way along the final leg
-    if (flare_distance > total_distance*0.5f) {
-        flare_distance = total_distance*0.5f;
-    }
-
-    // project a point 500 meters past the landing point, passing
-    // through the landing point
-    const float land_projection = 500;
-    int32_t land_bearing_cd = prev_WP_loc.get_bearing_to(next_WP_loc);
-
-    // now calculate our aim point, which is before the landing
-    // point and above it
-    Location loc = next_WP_loc;
-    loc.offset_bearing(land_bearing_cd * 0.01f, -flare_distance);
-    loc.alt += aim_height*100;
-
-    // calculate slope to landing point
-    bool is_first_calc = is_zero(slope);
-    slope = (sink_height - aim_height) / (total_distance - flare_distance);
-    if (is_first_calc) {
-        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Landing glide slope %.1f degrees", (double)degrees(atanf(slope)));
-    }
-
-    // calculate point along that slope 500m ahead
-    loc.offset_bearing(land_bearing_cd * 0.01f, land_projection);
-    loc.alt -= slope * land_projection * 100;
-
-    // setup the offset_cm for set_target_altitude_proportion()
-    target_altitude_offset_cm = loc.alt - prev_WP_loc.alt;
-
-    // calculate the proportion we are to the target
-    float land_proportion = current_loc.line_path_proportion(prev_WP_loc, loc);
-
-    // now setup the glide slope for landing
-    set_target_altitude_proportion_fn(loc, 1.0f - land_proportion);
-
-    // stay within the range of the start and end locations in altitude
-    constrain_target_altitude_location_fn(loc, prev_WP_loc);
+    // Выводим отладочную информацию о целевой высоте
+    GCS_SEND_TEXT(MAV_SEVERITY_DEBUG, "Target altitude: %.1f m, Current altitude: %.1f m",
+                  (double)target_height, (double)(current_loc.alt * 0.01f));
 }
 
 int32_t AP_Landing::type_slope_get_target_airspeed_cm(void)
@@ -358,12 +237,13 @@ int32_t AP_Landing::type_slope_get_target_airspeed_cm(void)
     case SlopeStage::APPROACH:
         break;
     case SlopeStage::PREFLARE:
-    case SlopeStage::FINAL:
+    	break;
+   /* case SlopeStage::FINAL:
         if (pre_flare_airspeed > 0) {
             // if we just preflared then continue using the pre-flare airspeed during final flare
             target_airspeed_cm = pre_flare_airspeed * 100;
         }
-        break;
+        break;*/
     }
 
     // when landing, add half of head-wind.

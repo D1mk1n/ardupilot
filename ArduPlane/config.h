@@ -155,7 +155,7 @@
  # define PITCH_MAX                              20
 #endif
 #ifndef PITCH_MIN
- # define PITCH_MIN                              -25
+ # define PITCH_MIN                              -90
 #endif
 
 #ifndef RUDDER_MIX
