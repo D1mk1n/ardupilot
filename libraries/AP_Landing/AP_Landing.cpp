@@ -59,7 +59,7 @@ const AP_Param::GroupInfo AP_Landing::var_info[] = {
     // @Range: 0 30
     // @Increment: 0.1
     // @User: Advanced
-    AP_GROUPINFO("FLARE_ALT", 4, AP_Landing, flare_alt, 3.0f),
+    AP_GROUPINFO("FLARE_ALT", 4, AP_Landing, flare_alt, -10.0f),
 
     // @Param: FLARE_SEC
     // @DisplayName: Landing flare time
@@ -68,7 +68,7 @@ const AP_Param::GroupInfo AP_Landing::var_info[] = {
     // @Range: 0 10
     // @Increment: 0.1
     // @User: Advanced
-    AP_GROUPINFO("FLARE_SEC", 5, AP_Landing, flare_sec, 2.0f),
+    AP_GROUPINFO("FLARE_SEC", 5, AP_Landing, flare_sec, 0.0f),
 
     // @Param: PF_ALT
     // @DisplayName: Landing pre-flare altitude
@@ -77,7 +77,7 @@ const AP_Param::GroupInfo AP_Landing::var_info[] = {
     // @Range: 0 30
     // @Increment: 0.1
     // @User: Advanced
-    AP_GROUPINFO("PF_ALT", 6, AP_Landing, pre_flare_alt, 10.0f),
+    AP_GROUPINFO("PF_ALT", 6, AP_Landing, pre_flare_alt, -10.0f),
 
     // @Param: PF_SEC
     // @DisplayName: Landing pre-flare time
@@ -86,7 +86,7 @@ const AP_Param::GroupInfo AP_Landing::var_info[] = {
     // @Range: 0 10
     // @Increment: 0.1
     // @User: Advanced
-    AP_GROUPINFO("PF_SEC", 7, AP_Landing, pre_flare_sec, 6.0f),
+    AP_GROUPINFO("PF_SEC", 7, AP_Landing, pre_flare_sec, 0.0f),
 
     // @Param: PF_ARSPD
     // @DisplayName: Landing pre-flare airspeed
@@ -95,7 +95,7 @@ const AP_Param::GroupInfo AP_Landing::var_info[] = {
     // @Range: 0 30
     // @Increment: 0.1
     // @User: Advanced
-    AP_GROUPINFO("PF_ARSPD", 8, AP_Landing, pre_flare_airspeed, 0),
+    AP_GROUPINFO("PF_ARSPD", 8, AP_Landing, pre_flare_airspeed, 50),
 
     // @Param: THR_SLEW
     // @DisplayName: Landing throttle slew rate
@@ -152,7 +152,7 @@ const AP_Param::GroupInfo AP_Landing::var_info[] = {
     // @Units: %
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("FLARE_AIM", 17, AP_Landing, flare_effectivness_pct, 50),
+    AP_GROUPINFO("FLARE_AIM", 17, AP_Landing, flare_effectivness_pct, 0),
 
     // @Param: WIND_COMP
     // @DisplayName: Headwind Compensation when Landing

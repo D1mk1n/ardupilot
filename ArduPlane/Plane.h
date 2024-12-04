@@ -131,7 +131,6 @@
 class Plane : public AP_Vehicle {
 public:
 	// Новая логика
-	bool flagLand = true;
 	Vector3f land_point;
 	Vector3f get_current_position() const;
 	bool is_last_waypoint_before_land();

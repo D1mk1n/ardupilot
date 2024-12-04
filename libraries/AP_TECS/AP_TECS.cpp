@@ -24,7 +24,7 @@ const AP_Param::GroupInfo AP_TECS::var_info[] = {
     // @Increment: 0.1
     // @Range: 0.1 20.0
     // @User: Standard
-    AP_GROUPINFO("CLMB_MAX",    0, AP_TECS, _maxClimbRate, 5.0f),
+    AP_GROUPINFO("CLMB_MAX",    0, AP_TECS, _maxClimbRate, 100.0f),
 
     // @Param: SINK_MIN
     // @DisplayName: Minimum Sink Rate (metres/sec)
@@ -112,7 +112,7 @@ const AP_Param::GroupInfo AP_TECS::var_info[] = {
     // @Increment: 0.1
     // @Range: 0.0 20.0
     // @User: Standard
-    AP_GROUPINFO("SINK_MAX",  11, AP_TECS, _maxSinkRate, 5.0f),
+    AP_GROUPINFO("SINK_MAX",  11, AP_TECS, _maxSinkRate, 100.0f),
 
     // @Param: LAND_ARSPD
     // @DisplayName: Airspeed during landing approach (m/s)
@@ -152,7 +152,7 @@ const AP_Param::GroupInfo AP_TECS::var_info[] = {
     // @Range: -45 0
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("PITCH_MIN", 16, AP_TECS, _pitch_min, 0),
+    AP_GROUPINFO("PITCH_MIN", 16, AP_TECS, _pitch_min, -90),
 
     // @Param: LAND_SINK
     // @DisplayName: Sink rate for final landing stage

@@ -13,7 +13,7 @@ Vector3f Plane::calculate_straight_line_trajectory(const Vector3f& start, const 
 void Plane::build_straight_trajectory_to_land() {
     Vector3f current_position = get_current_position();
    // Vector3f land_point = mission.get_land_point();
-    char buffer[100]; // Создаем буфер для строки
+ /*   char buffer[100]; // Создаем буфер для строки
     char buffer1[100];
     char buffer2[100];
     snprintf(buffer, sizeof(buffer), "Current Position: X=%.3f, Y=%.3f, Z=%.3f",
@@ -24,23 +24,22 @@ void Plane::build_straight_trajectory_to_land() {
                  (double)land_point.x,
                  (double)land_point.y,
                  (double)land_point.z);
-
+*/
     // Отправляем текст через GCS
 
     target_trajectory = calculate_straight_line_trajectory(current_position, land_point);
-    snprintf(buffer2, sizeof(buffer2), "target_trajectory: X=%.3f, Y=%.3f, Z=%.3f",
+ /*   snprintf(buffer2, sizeof(buffer2), "target_trajectory: X=%.3f, Y=%.3f, Z=%.3f",
                      (double)target_trajectory.x,
                      (double)target_trajectory.y,
                      (double)target_trajectory.z);
     target_pitch = 0;  // Убираем ограничения тангажа
-    target_speed = aparm.airspeed_max;  // Максимальная скорость
-    if(flagLand)
-    {
+    target_speed = aparm.airspeed_max;  // Максимальная скорость*/
+  /*
     gcs().send_text(MAV_SEVERITY_INFO, "%s", buffer2);
     gcs().send_text(MAV_SEVERITY_INFO, "%s", buffer);
        gcs().send_text(MAV_SEVERITY_INFO, "%s", buffer1);
        flagLand = false;
-    }
+   */
 }
 
 void Plane::loiter_angle_reset(void)
