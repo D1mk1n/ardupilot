@@ -316,9 +316,9 @@ void AP_Landing::type_slope_setup_landing_glide_slope(const Location &prev_WP_lo
     loc.alt += aim_height*100;
 
     // calculate slope to landing point
-    bool is_first_calc = is_zero(slope);
-    slope = (sink_height * 1.2) /(total_distance * 0.9);
-    if (is_first_calc) {
+   // bool is_first_calc = is_zero(slope);
+    slope = (sink_height) /(total_distance);
+    if (true) {
         GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Landing glide slope %.1f degrees", (double)degrees(atanf(slope)));
 
     }
