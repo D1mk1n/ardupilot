@@ -46,7 +46,7 @@ bool ModeAuto::_enter() {
         plane.build_straight_trajectory_to_land();
 
         // Disable landing modes (flare, preflare)
-        plane.landing.disable_landing_modes = true; // Устанавливаем флаг
+      //  plane.landing.disable_landing_modes = true; // Устанавливаем флаг
     }
 
     return true;
@@ -99,7 +99,7 @@ void ModeAuto::update() {
     // Check if this is the last waypoint before LAND
     if (plane.is_last_waypoint_before_land()) {
             plane.build_straight_trajectory_to_land();
-            plane.landing.disable_landing_modes = true; // Устанавливаем флаг
+          //  plane.landing.disable_landing_modes = true; // Устанавливаем флаг
 
             // Управляем самолетом для прямолинейного полета
             plane.calc_nav_roll();

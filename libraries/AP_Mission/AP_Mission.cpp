@@ -78,24 +78,29 @@ bool AP_Mission::get_next_nav_cmd(Mission_Command& cmd) const {
 
 /// init - initialises this library including checks the version in eeprom matches this library
 bool AP_Mission::is_last_before_land() {
-    // Получаем текущую навигационную команду
     const Mission_Command& current_cmd = get_current_nav_cmd();
+ //   gcs().send_text(MAV_SEVERITY_INFO, "Current command index: %d, ID: %d", current_cmd.index, current_cmd.id);
 
-    // Проверяем, что текущая команда - это WAYPOINT
     if (current_cmd.id != MAV_CMD_NAV_WAYPOINT) {
         return false;
     }
 
-    // Получаем следующую навигационную команду
     Mission_Command next_cmd;
-    if (!get_next_nav_cmd(current_cmd.index, next_cmd)) {
-        // Если не удалось получить следующую команду, это не последняя перед LAND
+    read_cmd_from_storage(current_cmd.index + 1, next_cmd);
+    if (!read_cmd_from_storage(current_cmd.index + 1, next_cmd)) {
         return false;
     }
 
-    // Проверяем, что следующая команда - это LAND
-    return next_cmd.id == MAV_CMD_NAV_LAND;
+   // gcs().send_text(MAV_SEVERITY_INFO, "Next command index: %d, ID: %d", next_cmd.index, next_cmd.id);
+    if (next_cmd.id != MAV_CMD_NAV_LAND) {
+   //     gcs().send_text(MAV_SEVERITY_INFO, "Next command is not LAND.");
+        return false;
+    }
+
+  //  gcs().send_text(MAV_SEVERITY_INFO, "Current WP is last before LAND.");
+       return true;
 }
+
 
 
 Vector3f AP_Mission::get_land_point() {

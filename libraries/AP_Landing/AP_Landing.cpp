@@ -602,15 +602,15 @@ int32_t AP_Landing::get_target_airspeed_cm(void)
  */
 bool AP_Landing::request_go_around(void)
 {
-    bool success = false;
+   // bool success = false;
 
     switch (type) {
     case TYPE_STANDARD_GLIDE_SLOPE:
-        success = type_slope_request_go_around();
+       // success = type_slope_request_go_around();
         break;
 #if HAL_LANDING_DEEPSTALL_ENABLED
     case TYPE_DEEPSTALL:
-        success = deepstall.request_go_around();
+       // success = deepstall.request_go_around();
         break;
 #endif
     default:
@@ -618,7 +618,7 @@ bool AP_Landing::request_go_around(void)
     }
 
     Log();
-    return success;
+    return false;
 }
 
 void AP_Landing::handle_flight_stage_change(const bool _in_landing_stage)

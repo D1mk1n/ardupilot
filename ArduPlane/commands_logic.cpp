@@ -32,16 +32,16 @@ bool Plane::start_command(const AP_Mission::Mission_Command& cmd)
         auto_state.wp_is_land_approach = have_next_cmd && (next_nav_cmd.id == MAV_CMD_NAV_LAND);
         if(cmd.id == MAV_CMD_NAV_LAND)
         {
-        	gcs().send_text(MAV_SEVERITY_INFO, "MAV_CMD_NAV_LAND!!!!!!!!!!");
+        	gcs().send_text(MAV_SEVERITY_INFO, "MAV_CMD_NAV_LAND!");
         	        land_point = Vector3f(cmd.content.location.lat * 1e-7f,
                     cmd.content.location.lng * 1e-7f,
                     cmd.content.location.alt * 0.01f);
-        	        char buffer[100];
+        	       /* char buffer[100];
         	            snprintf(buffer, sizeof(buffer), "MAV_CMD_NAV_LAND: X=%.3f, Y=%.3f, Z=%.3f",
         	                     (double)land_point.x,
         	                     (double)land_point.y,
         	                     (double)land_point.z);
-        	            gcs().send_text(MAV_SEVERITY_INFO, "%s", buffer);
+        	            gcs().send_text(MAV_SEVERITY_INFO, "%s", buffer);*/
         }
 #if HAL_QUADPLANE_ENABLED
         if (have_next_cmd && quadplane.is_vtol_land(next_nav_cmd.id)) {

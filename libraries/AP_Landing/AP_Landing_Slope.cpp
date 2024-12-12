@@ -89,16 +89,16 @@ bool AP_Landing::type_slope_verify_land(const Location &prev_WP_loc, Location &n
     // 2) passed land point and don't have an accurate AGL
     // 3) probably crashed (ensures motor gets turned off)
 
-    const bool on_approach_stage = type_slope_is_on_approach();
-    const bool below_flare_alt = (height <= flare_alt);
-    const bool below_flare_sec = (flare_sec > 0 && height <= sink_rate * flare_sec);
-    const bool probably_crashed = (aparm.crash_detection_enable && fabsf(sink_rate) < 0.2f && !is_flying);
+ //   const bool on_approach_stage = type_slope_is_on_approach();
+   // const bool below_flare_alt = (height <= flare_alt);
+   // const bool below_flare_sec = (flare_sec > 0 && height <= sink_rate * flare_sec);
+   // const bool probably_crashed = (aparm.crash_detection_enable && fabsf(sink_rate) < 0.2f && !is_flying);
 
     height_flare_log = height;
 
     const AP_GPS &gps = AP::gps();
 
-    if ((on_approach_stage && below_flare_alt) ||
+ /*   if ((on_approach_stage && below_flare_alt) ||
         (on_approach_stage && below_flare_sec && (wp_proportion > 0.5)) ||
         (!rangefinder_state_in_range && wp_proportion >= 1) ||
         probably_crashed) {
@@ -142,7 +142,7 @@ bool AP_Landing::type_slope_verify_land(const Location &prev_WP_loc, Location &n
         if (reached_pre_flare_alt || reached_pre_flare_sec) {
             type_slope_stage = SlopeStage::PREFLARE;
         }
-    }
+    }*/
 
     /*
       when landing we keep the L1 navigation waypoint 200m ahead. This
@@ -279,9 +279,9 @@ void AP_Landing::type_slope_setup_landing_glide_slope(const Location &prev_WP_lo
     float sink_rate = sink_height / sink_time;
 
     // the height we aim for is the one to give us the right flare point
-    float aim_height = flare_sec * sink_rate;
+    float aim_height = sink_rate;
     if (aim_height <= 0) {
-        aim_height = flare_alt;
+        aim_height = 0;
     }
 
     // don't allow the aim height to be too far above LAND_FLARE_ALT
@@ -317,9 +317,10 @@ void AP_Landing::type_slope_setup_landing_glide_slope(const Location &prev_WP_lo
 
     // calculate slope to landing point
     bool is_first_calc = is_zero(slope);
-    slope = (sink_height - aim_height) / (total_distance - flare_distance);
+    slope = (sink_height * 1.2) /(total_distance * 0.9);
     if (is_first_calc) {
         GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Landing glide slope %.1f degrees", (double)degrees(atanf(slope)));
+
     }
 
     // calculate point along that slope 500m ahead
