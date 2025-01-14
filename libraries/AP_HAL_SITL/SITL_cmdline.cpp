@@ -678,9 +678,9 @@ bool SITL_State::parse_home(const char *home_str, Location &loc, float &yaw_degr
     if (loc.lat == 0 && loc.lng == 0) {
         // default to CMAC instead of middle of the ocean. This makes
         // SITL in MissionPlanner a bit more useful
-        loc.lat = -35.363261*1e7;
-        loc.lng = 149.165230*1e7;
-        loc.alt = 584*100;
+        loc.lat = 53.804156*1e7;
+        loc.lng = 31.010732*1e7;
+        loc.alt = 166*100;
     }
 
     yaw_degrees = strtof(yaw_s, nullptr);

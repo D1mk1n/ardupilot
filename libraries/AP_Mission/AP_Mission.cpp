@@ -2412,7 +2412,7 @@ void AP_Mission::check_eeprom_version()
 uint16_t AP_Mission::get_landing_sequence_start(const Location &current_loc)
 {
     uint16_t landing_start_index = 0;
-    float min_distance = -1;
+    float min_distance = 30;
 
     // Go through mission looking for nearest landing start command
     const auto count = num_commands();
@@ -2482,7 +2482,7 @@ bool AP_Mission::jump_to_closest_mission_leg(const Location &current_loc)
     }
 
     uint16_t landing_start_index = 0;
-    float min_distance = -1;
+    float min_distance = 30;
 
     // Go through mission and check each DO_RETURN_PATH_START
     for (uint16_t i = 1; i < num_commands(); i++) {
@@ -2491,7 +2491,7 @@ bool AP_Mission::jump_to_closest_mission_leg(const Location &current_loc)
             uint16_t tmp_index;
             float tmp_distance;
             if (distance_to_mission_leg(i, tmp_distance, tmp_index, current_loc) && (min_distance < 0 || tmp_distance <= min_distance)){
-                min_distance = tmp_distance;
+             //   min_distance = tmp_distance;
                 landing_start_index = tmp_index;
             }
         }
@@ -2611,7 +2611,7 @@ bool AP_Mission::is_best_land_sequence(const Location &current_loc)
 bool AP_Mission::distance_to_landing(uint16_t index, float &tot_distance, Location prev_loc)
 {
     Mission_Command temp_cmd;
-    tot_distance = 0.0f;
+    tot_distance = 30.0f;
     bool ret = false;  // reached end of loop without getting to a landing
 
     // back up jump tracking to reset after distance calculation

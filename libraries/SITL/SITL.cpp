@@ -438,22 +438,22 @@ const AP_Param::GroupInfo SIM::var_info2[] = {
     // @DisplayName: Original Position (Latitude)
     // @Description: Specifies vehicle's startup latitude
     // @User: Advanced
-    AP_GROUPINFO("OPOS_LAT",    51, SIM,  opos.lat, -35.363261f),
+    AP_GROUPINFO("OPOS_LAT",    51, SIM,  opos.lat, 53.804164f),
     // @Param: OPOS_LNG
     // @DisplayName: Original Position (Longitude)
     // @Description: Specifies vehicle's startup longitude
     // @User: Advanced
-    AP_GROUPINFO("OPOS_LNG",    52, SIM,  opos.lng, 149.165230f),
+    AP_GROUPINFO("OPOS_LNG",    52, SIM,  opos.lng, 31.010719f),
     // @Param: OPOS_ALT
     // @DisplayName: Original Position (Altitude)
     // @Description: Specifies vehicle's startup altitude (AMSL)
     // @User: Advanced
-    AP_GROUPINFO("OPOS_ALT",    53, SIM,  opos.alt, 584.0f),
+    AP_GROUPINFO("OPOS_ALT",    53, SIM,  opos.alt, 166.0f),
     // @Param: OPOS_HDG
     // @DisplayName: Original Position (Heading)
     // @Description: Specifies vehicle's startup heading (0-360)
     // @User: Advanced
-    AP_GROUPINFO("OPOS_HDG",    54, SIM,  opos.hdg, 353.0f),
+    AP_GROUPINFO("OPOS_HDG",    54, SIM,  opos.hdg, 110.0f),
     // @Param: LOOP_DELAY
     // @DisplayName: Extra delay per main loop
     // @Description: Extra time delay per main loop

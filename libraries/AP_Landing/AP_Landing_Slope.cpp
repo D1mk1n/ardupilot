@@ -316,9 +316,9 @@ void AP_Landing::type_slope_setup_landing_glide_slope(const Location &prev_WP_lo
     loc.alt += aim_height*100;
 
     // calculate slope to landing point
-   // bool is_first_calc = is_zero(slope);
+  //  bool is_first_calc = is_zero(slope);
     slope = (sink_height) /(total_distance);
-    if (true) {
+    if (false) {
         GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Landing glide slope %.1f degrees", (double)degrees(atanf(slope)));
 
     }
@@ -344,7 +344,7 @@ int32_t AP_Landing::type_slope_get_target_airspeed_cm(void)
 {
     // we're landing, check for custom approach and
     // pre-flare airspeeds. Also increase for head-winds
-
+  //  int32_t speedMy = 1800;
     const float land_airspeed = tecs_Controller->get_land_airspeed();
     int32_t target_airspeed_cm = aparm.airspeed_cruise*100;
     if (land_airspeed >= 0) {
@@ -372,9 +372,8 @@ int32_t AP_Landing::type_slope_get_target_airspeed_cm(void)
     const int32_t head_wind_compensation_cm = ahrs.head_wind() * head_wind_comp * 100;
 
     const uint32_t max_airspeed_cm = AP_Landing::allow_max_airspeed_on_land() ? aparm.airspeed_max*100 : aparm.airspeed_cruise*100;
-    
+
     return constrain_int32(target_airspeed_cm + head_wind_compensation_cm, target_airspeed_cm, max_airspeed_cm);
-    
 }
 
 int32_t AP_Landing::type_slope_constrain_roll(const int32_t desired_roll_cd, const int32_t level_roll_limit_cd)
