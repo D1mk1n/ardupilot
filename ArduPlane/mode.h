@@ -869,6 +869,8 @@ protected:
     void restore_mode(const char *reason, ModeReason modereason);
 
     bool _enter() override;
+    AP_Mission::Mission_Command cmd[3];
+       uint8_t stage;
 };
 
 #endif

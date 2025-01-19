@@ -107,16 +107,6 @@ public:
     // requires original message in order to extract caller's sysid and compid
     MAV_RESULT handle_command_do_gimbal_manager_configure(const mavlink_command_int_t &packet, const mavlink_message_t &msg);
 
-#if AP_MAVLINK_MSG_MOUNT_CONFIGURE_ENABLED
-    // process MOUNT_CONFIGURE messages received from GCS. deprecated.
-    void handle_mount_configure(const mavlink_mount_configure_t &msg);
-#endif
-
-#if AP_MAVLINK_MSG_MOUNT_CONTROL_ENABLED
-    // process MOUNT_CONTROL messages received from GCS. deprecated.
-    void handle_mount_control(const mavlink_mount_control_t &packet);
-#endif
-
     // send a GIMBAL_DEVICE_ATTITUDE_STATUS message to GCS
     void send_gimbal_device_attitude_status(mavlink_channel_t chan);
 
@@ -275,13 +265,6 @@ protected:
     // should be called on every update
     void set_rctargeting_on_rcinput_change();
 
-	#if AP_MOUNT_POI_TO_LATLONALT_ENABLED
-		// calculate the Location that the gimbal is pointing at
-		void calculate_poi();
-	#endif
-
-    bool _yaw_lock;                 // yaw_lock used in RC_TARGETING mode. True if the gimbal's yaw target is maintained in earth-frame, if false (aka "follow") it is maintained in body-frame
-
     // get angle targets (in radians) to ROI location
     // returns true on success, false on failure
     bool get_angle_target_to_roi(MountTarget& angle_rad) const WARN_IF_UNUSED;
@@ -327,11 +310,16 @@ private:
     // target_type will be either ANGLE or RATE, rpy will be the target angle in deg or rate in deg/s
     void get_rc_target(MountTargetType& target_type, MountTarget& rpy) const;
 
-    bool _yaw_lock;                 // yaw_lock used in RC_TARGETING mode. True if the gimbal's yaw target is maintained in earth-frame, if false (aka "follow") it is maintained in body-frame
-
     // get angle targets (in radians) to a Location
     // returns true on success, false on failure
     bool get_angle_target_to_location(const Location &loc, MountTarget& angle_rad) const WARN_IF_UNUSED;
+
+#if AP_MOUNT_POI_TO_LATLONALT_ENABLED
+    // calculate the Location that the gimbal is pointing at
+    void calculate_poi();
+#endif
+
+    bool _yaw_lock;                 // yaw_lock used in RC_TARGETING mode. True if the gimbal's yaw target is maintained in earth-frame, if false (aka "follow") it is maintained in body-frame
 
 #if AP_MOUNT_POI_TO_LATLONALT_ENABLED
     struct {
@@ -342,8 +330,6 @@ private:
         Location poi_loc;         // location of the POI
         Quaternion att_quat;      // attitude quaternion of the gimbal
     } poi_calculation;
-    // calculate the Location that the gimbal is pointing at
-    void calculate_poi();
 #endif
 
     Location _roi_target;           // roi target location
